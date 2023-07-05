@@ -15,34 +15,21 @@ public class GameUI extends JFrame {
     private final Utils utils = new Utils(); // Hilfsklasse für die Bilder
     private final int waitPeriod; // Wartezeit zwischen den Zügen
     private final int x = 6, y = 6; // Größe des Spielfelds
+    private final int playerCount;
     private boolean firstClick = false, imageLoaded = false, flipAllowed = true; // FlipFlops
     private JButton firstButton; // Cache für den ersten Button beim Klick
     // Konstruktor
     public GameUI(int waitPeriod, int playerCount, AtomicReferenceArray<String> playerNames) {
         super("Dinory"); // JFrame Erstellen
 
-
-
         // Init WaitPeriod
-        if (waitPeriod < 1000) {
-            waitPeriod = 1000;
-            throw new IllegalArgumentException("Wartezeit muss größer als 1000 sein! \nDie Wartezeit wird auf 1 Sekunde gesetzt.");
-        } else if (waitPeriod > 10000) {
-            waitPeriod = 10000;
-            throw new IllegalArgumentException("Wartezeit muss kleiner als 10 Sekunden sein! \nDie Wartezeit wird auf 10 Sekunden gesetzt.");
-        } else {
-            this.waitPeriod = waitPeriod;
-        }
+        this.waitPeriod = waitPeriod;
 
         // Init Size
         int width = x * 100, height = y * 100;
 
-
         // Init PlayerCount
-        if (playerCount <= 0) {
-            throw new IllegalArgumentException("Es muss mindestens ein Spieler vorhanden sein! \nDie Anzahl der Spieler wird auf 1 gesetzt.");
-            // playerCount = 1;
-        }
+        this.playerCount = playerCount;
 
 
         // Init PlayerNames
