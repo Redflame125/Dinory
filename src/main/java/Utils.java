@@ -32,7 +32,6 @@ public class Utils {
     public boolean checkPairs(JButton btn, JButton firstButton, HashMap<JButton, Integer> buttonPairs) {
         int i = buttonPairs.get(btn);
         int j = buttonPairs.get(firstButton);
-        System.out.println((i + " " + j + " " + (i == j)));
         return i == j;
     }
 }

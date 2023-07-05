@@ -76,13 +76,13 @@ public class GameUI extends JFrame {
                     if (flipAllowed) {
                         handleButtonClicked(btn);
 
-                    if (firstClick && imageLoaded) {
-                        firstClick = false;
-                        handleFlip(btn, firstButton);
-                    } else {
-                        firstClick = true;
-                        firstButton = btn;
-                    }
+                        if (firstClick && imageLoaded) {
+                            firstClick = false;
+                            handleFlip(btn, firstButton);
+                        } else {
+                            firstClick = true;
+                            firstButton = btn;
+                        }
                     }
                 });
             }
@@ -98,7 +98,7 @@ public class GameUI extends JFrame {
     private void mixer(ArrayList<JButton> buttonList) {
         Random random = new Random();
 
-        while (buttonList.size() > 1) {
+        while (buttonList.size() > 0) {
             int randomKey = random.nextInt(buttonList.size());
             int randomValue = random.nextInt(buttonList.size());
 
@@ -106,7 +106,8 @@ public class GameUI extends JFrame {
                 randomValue = random.nextInt(buttonList.size());
             }
 
-            int index = buttonList.size() / 2;
+            int index = (buttonList.size() / 2) - 1;
+
             ImageIcon icon = dinoPairs.get(index);
 
             JButton key = buttonList.get(randomKey);
