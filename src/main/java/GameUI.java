@@ -16,8 +16,8 @@ public class GameUI extends JFrame {
     private final int waitPeriod; // Wartezeit zwischen den Zügen
     private final int x = 6, y = 6; // Größe des Spielfelds
     private final int playerCount;
-    private boolean firstClick = false, imageLoaded = false, flipAllowed = true; // FlipFlops
-    private JButton firstButton; // Cache für den ersten Button beim Klick
+    private boolean clickedOnce = false, flipAllowed = true; // FlipFlops
+    private JButton firstButton, doubleClickCheck; // Cache für den ersten Button beim Klick
     // Konstruktor
     public GameUI(int waitPeriod, int playerCount, AtomicReferenceArray<String> playerNames) {
         super("Dinory"); // JFrame Erstellen
@@ -61,26 +61,27 @@ public class GameUI extends JFrame {
         // Create buttons
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++){
-                JButton[][] btnField = new JButton[x][y];
-                btnField[i][j] = new JButton();
-                btnField[i][j].setSize(83, 83);
-                btnField[i][j].setBackground(Color.WHITE);
-                btnField[i][j].setBorder(BorderFactory.createLineBorder(Color.WHITE));
-                buttonPanel.add(btnField[i][j]);
-                btnField[i][j].setIcon(utils.createImageIcon("Backside.png"));
-                buttonList.add(btnField[i][j]);
+                JButton button = new JButton();
+                button.setSize(83, 83);
+                button.setBackground(Color.WHITE);
+                button.setBorder(BorderFactory.createLineBorder(Color.WHITE));
+                buttonPanel.add(button);
+                button.setIcon(utils.createImageIcon("Backside.png"));
+                buttonList.add(button);
 
-                btnField[i][j].addActionListener(e -> {
+                button.addActionListener(e -> {
                     JButton btn = (JButton) e.getSource();
-                    imageLoaded = false;
-                    if (flipAllowed) {
-                        handleButtonClicked(btn);
 
-                        if (firstClick && imageLoaded) {
-                            firstClick = false;
+
+                    if (flipAllowed) {
+                        btn.setIcon(buttonImages.get(btn));
+
+                        if (clickedOnce && btn != firstButton) {
+                            clickedOnce = false;
                             handleFlip(btn, firstButton);
-                        } else {
-                            firstClick = true;
+                            doubleClickCheck = btn;
+                        } else if (doubleClickCheck != btn) {
+                            clickedOnce = true;
                             firstButton = btn;
                         }
                     }
@@ -142,7 +143,7 @@ public class GameUI extends JFrame {
 
     // Handle flip
     private void handleFlip(JButton btn, JButton firstButton) {
-        Thread t = new Thread(() -> {
+        new Thread(() -> {
             try {
                 if (!utils.checkPairs(btn, firstButton, buttonPairs)) {
                     flipAllowed = false;
@@ -157,13 +158,6 @@ public class GameUI extends JFrame {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        });
-        t.start();
-    }
-
-    // Handle button click
-    private void handleButtonClicked(JButton btn) {
-        btn.setIcon(buttonImages.get(btn));
-        imageLoaded = true;
+        }).start();
     }
 }
