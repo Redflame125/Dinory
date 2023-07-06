@@ -3,7 +3,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class Main {
     public static void main(String[] args) {
-        if (!args[0].equals("debug")) {
+        if (args.length == 0) {
             Scanner scanner = new Scanner(System.in);
 
             System.out.println("Bitte geben Sie die Wartezeit ein, wie lange die Karten aufgedeckt bleiben: ");

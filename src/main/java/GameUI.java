@@ -33,8 +33,8 @@ public class GameUI extends JFrame {
 
 
         // Init PlayerNames
+        HashMap<String, Integer> playerScores = new HashMap<>();
         for (int i = 0; i < playerCount; i++) {
-            HashMap<String, Integer> playerScores = new HashMap<>();
             playerScores.put(playerNames.get(i), 0);
         }
 
@@ -99,6 +99,7 @@ public class GameUI extends JFrame {
     private void mixer(ArrayList<JButton> buttonList) {
         Random random = new Random();
 
+        // Generate random pairs
         while (buttonList.size() > 0) {
             int randomKey = random.nextInt(buttonList.size());
             int randomValue = random.nextInt(buttonList.size());
@@ -107,8 +108,10 @@ public class GameUI extends JFrame {
                 randomValue = random.nextInt(buttonList.size());
             }
 
+            // Calculates number of pairs
             int index = (buttonList.size() / 2) - 1;
 
+            // Get random dino image
             ImageIcon icon = dinoPairs.get(index);
 
             JButton key = buttonList.get(randomKey);
@@ -134,6 +137,7 @@ public class GameUI extends JFrame {
         for (int i = 0; i < 18; i++) {
             randomList.add(utils.createImageIcon("Dino/Dino" + i + ".png"));
         }
+        // Shuffle the cards
         Collections.shuffle(randomList);
 
         for (int i = 0; i < 18; i++) {
