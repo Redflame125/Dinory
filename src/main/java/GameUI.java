@@ -16,6 +16,10 @@ public class GameUI extends JFrame {
     private final int waitPeriod; // Wartezeit zwischen den Zügen
     private final int x = 6, y = 6; // Größe des Spielfelds
     private final int playerCount;
+
+    private final AtomicReferenceArray<String> playerNames;
+    public Object playerScores;
+    public int endCounter = 0;
     private int currentPlayer = 0;
     private boolean clickedOnce = false, flipAllowed = true; // FlipFlops
     private JButton firstButton, doubleClickCheck; // Cache für den ersten Button beim Klick
@@ -32,6 +36,7 @@ public class GameUI extends JFrame {
         // Init PlayerCount
         this.playerCount = playerCount;
 
+        this.playerNames = playerNames;
 
         // Init PlayerNames
         HashMap<String, Integer> playerScores = new HashMap<>();
@@ -44,6 +49,7 @@ public class GameUI extends JFrame {
         // JFrame Attribute
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(width, height);
+        setAlwaysOnTop(true);
         setVisible(true);
         setResizable(false);
         JPanel buttonPanel = new JPanel();
@@ -82,12 +88,6 @@ public class GameUI extends JFrame {
                             clickedOnce = false;
                             handleFlip(btn, firstButton);
                             doubleClickCheck = btn;
-
-                            currentPlayer++;
-                            if (currentPlayer == playerCount) {
-                                currentPlayer = 0;
-                            }
-                            System.out.println(playerNames.get(currentPlayer) + " ist am Zug");
                         } else if (doubleClickCheck != btn) {
                             clickedOnce = true;
                             firstButton = btn;
@@ -162,9 +162,16 @@ public class GameUI extends JFrame {
                     sleep(waitPeriod);
                     btn.setIcon(utils.createImageIcon("Backside.png"));
                     firstButton.setIcon(utils.createImageIcon("Backside.png"));
+                    System.out.println("Falsch geraten!");
+                    if (currentPlayer == playerCount) {
+                        currentPlayer = 0;
+                    } else {
+                        currentPlayer++;
+                    }
                 } else {
                     btn.setEnabled(false);
                     firstButton.setEnabled(false);
+                    System.out.println("Richtig geraten!");
                 }
                 flipAllowed = true;
             } catch (InterruptedException e) {
@@ -172,4 +179,6 @@ public class GameUI extends JFrame {
             }
         }).start();
     }
+
+
 }

@@ -34,4 +34,8 @@ public class Utils {
         int j = buttonPairs.get(firstButton);
         return i == j;
     }
+
+    public Object sortScores(Object playerScores) {
+
+        return playerScores;}
 }
