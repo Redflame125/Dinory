@@ -16,6 +16,7 @@ public class GameUI extends JFrame {
     private final int waitPeriod; // Wartezeit zwischen den Zügen
     private final int x = 6, y = 6; // Größe des Spielfelds
     private final int playerCount;
+    private int currentPlayer = 0;
     private boolean clickedOnce = false, flipAllowed = true; // FlipFlops
     private JButton firstButton, doubleClickCheck; // Cache für den ersten Button beim Klick
     // Konstruktor
@@ -38,6 +39,7 @@ public class GameUI extends JFrame {
             playerScores.put(playerNames.get(i), 0);
         }
 
+        System.out.println(playerNames.get(currentPlayer) + " ist am Zug");
 
         // JFrame Attribute
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -80,6 +82,12 @@ public class GameUI extends JFrame {
                             clickedOnce = false;
                             handleFlip(btn, firstButton);
                             doubleClickCheck = btn;
+
+                            currentPlayer++;
+                            if (currentPlayer == playerCount) {
+                                currentPlayer = 0;
+                            }
+                            System.out.println(playerNames.get(currentPlayer) + " ist am Zug");
                         } else if (doubleClickCheck != btn) {
                             clickedOnce = true;
                             firstButton = btn;
