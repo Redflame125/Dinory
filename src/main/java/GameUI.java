@@ -9,41 +9,35 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 import static java.lang.Thread.sleep;
 
 public class GameUI extends JFrame {
-    private final HashMap<JButton, ImageIcon> buttonImages = new HashMap<>();
-    private final HashMap<Integer, ImageIcon> dinoPairs = new HashMap<>();
-    private final HashMap<JButton, Integer> buttonPairs = new HashMap<>();
-    private final Utils utils = new Utils(); // Hilfsklasse für die Bilder
-    private final int waitPeriod; // Wartezeit zwischen den Zügen
-    private final int x = 6, y = 6; // Größe des Spielfelds
-    private final int playerCount;
-
-    private final AtomicReferenceArray<String> playerNames;
-    public Object playerScores;
+    public final HashMap<String, Integer> playerScores = new HashMap<>(); // Cache for the PlayerScores
+    private final HashMap<JButton, ImageIcon> buttonImages = new HashMap<>(); // Cache for the ButtonImages
+    private final HashMap<JButton, Integer> buttonPairs = new HashMap<>(); // ButtonPairs for the checkPairs method
+    private final AtomicReferenceArray<ImageIcon> dinoPairs; // Cache for the DinoPairs
+    private final Utils utils = new Utils(); // Utils
+    private final GameManager game; // GameManager
+    private final int waitPeriod; // WaitPeriod between flips
     public int endCounter = 0;
     private int currentPlayer = 0;
     private boolean clickedOnce = false, flipAllowed = true; // FlipFlops
     private JButton firstButton, doubleClickCheck; // Cache für den ersten Button beim Klick
+
     // Konstruktor
-    public GameUI(int waitPeriod, int playerCount, AtomicReferenceArray<String> playerNames) {
+    public GameUI(int waitPeriod, int playerCount, AtomicReferenceArray<String> playerNames, int layout) {
         super("Dinory"); // JFrame Erstellen
 
         // Init WaitPeriod
         this.waitPeriod = waitPeriod;
 
         // Init Size
-        int width = x * 100, height = y * 100;
-
-        // Init PlayerCount
-        this.playerCount = playerCount;
-
-        this.playerNames = playerNames;
+        int width = layout * 100, height = layout * 100;
 
         // Init PlayerNames
-        HashMap<String, Integer> playerScores = new HashMap<>();
         for (int i = 0; i < playerCount; i++) {
             playerScores.put(playerNames.get(i), 0);
         }
 
+        // Init DinoPairs
+        dinoPairs = initDinoPairs((layout * layout) / 2);
         System.out.println(playerNames.get(currentPlayer) + " ist am Zug");
 
         // JFrame Attribute
@@ -55,20 +49,18 @@ public class GameUI extends JFrame {
         JPanel buttonPanel = new JPanel();
         add(buttonPanel);
 
+        // Center JFrame
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         setLocation(dim.width/2 - getSize().width/2, dim.height/2 - getSize().height/2);
 
-        initDinoPairs();
+        // Layout
+        buttonPanel.setLayout(new GridLayout(layout, layout));
 
-
-        buttonPanel.setLayout(new GridLayout(x, y));
-
-
-        ArrayList<JButton> buttonList = new ArrayList<>(); // Cache für die Buttons
+        ArrayList<JButton> buttonList = new ArrayList<>(); // Cache for the buttons
 
         // Create buttons
-        for (int i = 0; i < x; i++) {
-            for (int j = 0; j < y; j++){
+        for (int i = 0; i < layout; i++) {
+            for (int j = 0; j < layout; j++){
                 JButton button = new JButton();
                 button.setSize(83, 83);
                 button.setBackground(Color.WHITE);
@@ -77,6 +69,7 @@ public class GameUI extends JFrame {
                 button.setIcon(utils.createImageIcon("Backside.png"));
                 buttonList.add(button);
 
+                // Action Listener for the buttons
                 button.addActionListener(e -> {
                     JButton btn = (JButton) e.getSource();
 
@@ -97,17 +90,18 @@ public class GameUI extends JFrame {
             }
         }
 
-
+        // Randomize the dino pairs
         mixer(buttonList);
 
-        new GameManager(this);
+        // Init GameManager
+        game = new GameManager(this);
     }
 
     // Randomize the dino pairs
     private void mixer(ArrayList<JButton> buttonList) {
         Random random = new Random();
 
-        // Generate random pairs
+        // Generates two random different numbers
         while (buttonList.size() > 0) {
             int randomKey = random.nextInt(buttonList.size());
             int randomValue = random.nextInt(buttonList.size());
@@ -119,9 +113,10 @@ public class GameUI extends JFrame {
             // Calculates number of pairs
             int index = (buttonList.size() / 2) - 1;
 
-            // Get random dino image
+            // Get the dino pair image
             ImageIcon icon = dinoPairs.get(index);
 
+            // Get random buttons
             JButton key = buttonList.get(randomKey);
             JButton value = buttonList.get(randomValue);
 
@@ -131,6 +126,7 @@ public class GameUI extends JFrame {
             buttonPairs.put(key, index);
             buttonPairs.put(value, index);
 
+            // Remove the buttons from the list
             buttonList.remove(randomKey);
             if (randomKey < randomValue) {
                 randomValue--;
@@ -140,35 +136,43 @@ public class GameUI extends JFrame {
     }
 
     // Initialize dino pairs
-    private void initDinoPairs() {
-        ArrayList<ImageIcon> randomList = new ArrayList<>();
-        for (int i = 0; i < 18; i++) {
-            randomList.add(utils.createImageIcon("Dino/Dino" + i + ".png"));
+    private AtomicReferenceArray<ImageIcon> initDinoPairs(int size) {
+        ArrayList<ImageIcon> randomList = new ArrayList<>(); // Cache for the random dino images
+
+        // Add all the dino images to the list
+        for (int i = 0; i < size; i++) {
+            randomList.add(utils.createImageIcon("Dino/Dino" + (i) + ".png"));
         }
         // Shuffle the cards
         Collections.shuffle(randomList);
 
-        for (int i = 0; i < 18; i++) {
-            dinoPairs.put(i, randomList.get(i));
+        // Create the array
+        AtomicReferenceArray<ImageIcon> dinoPairs = new AtomicReferenceArray<>(new ImageIcon[size]);
+        for (int i = 0; i < size; i++) {
+            dinoPairs.set(i, randomList.get(i));
         }
+        return dinoPairs;
     }
 
     // Handle flip
     private void handleFlip(JButton btn, JButton firstButton) {
         new Thread(() -> {
             try {
-                if (!utils.checkPairs(btn, firstButton, buttonPairs)) {
+                if (!utils.checkPairs(btn, firstButton, buttonPairs)) { // Check if the buttons are a pair
                     flipAllowed = false;
-                    sleep(waitPeriod);
+                    sleep(waitPeriod); // Wait for the waitPeriod
+
+                    // Flip the buttons back
                     btn.setIcon(utils.createImageIcon("Backside.png"));
                     firstButton.setIcon(utils.createImageIcon("Backside.png"));
                     System.out.println("Falsch geraten!");
-                    if (currentPlayer == playerCount) {
+                    if (currentPlayer == playerScores.size()) {
                         currentPlayer = 0;
                     } else {
                         currentPlayer++;
                     }
                 } else {
+                    // Disable the buttons
                     btn.setEnabled(false);
                     firstButton.setEnabled(false);
                     System.out.println("Richtig geraten!");
@@ -179,6 +183,4 @@ public class GameUI extends JFrame {
             }
         }).start();
     }
-
-
 }
